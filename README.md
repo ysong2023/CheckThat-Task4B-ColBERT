@@ -1,6 +1,10 @@
 # CheckThat! 2025 Task 4B: Scientific Claim Source Retrieval
 
-This repository contains implementations of three different retrieval approaches for CheckThat! 2025 Task 4B: Scientific Claim Source Retrieval.
+This repository contains implementations of several retrieval approaches for CheckThat! 2025 Task 4B: Scientific Claim Source Retrieval. Our research investigated the efficacy of various information retrieval paradigms in the context of scientific claim source retrieval. We initially hypothesized that contextualized late interaction models like ColBERT v2 would achieve superior performance, given their strong results in general retrieval tasks. However, our empirical analysis revealed that OpenAI's embedding-based approach demonstrated higher effectiveness on our evaluation metrics. 
+
+This unexpected finding led us to explore potential explanations, particularly the lack of domain-specific knowledge in the base ColBERT model. To address this limitation, we implemented a fine-tuning strategy using a small subset of the development dataset (100 out of 1400 examples, constituting 7.15% of the total). We generated high-quality training triplets using GPT-4o, which produced appropriate query-positive-negative examples from paper titles and abstracts. 
+
+Our fine-tuning approach yielded modest but meaningful improvements (+0.46% on MRR@5) over the base ColBERT model. Given these results, we posit that with more extensive domain-specific training data and optimized fine-tuning protocols, ColBERT could potentially surpass the performance of OpenAI embeddings while maintaining greater computational efficiency and deployment flexibility.
 
 ## Task Description
 
@@ -8,7 +12,7 @@ The CheckThat! 2025 Task 4B focuses on retrieving scientific papers mentioned in
 
 The task is evaluated using Mean Reciprocal Rank (MRR@5) and is part of the [CLEF 2025 CheckThat! Lab](https://checkthat.gitlab.io/clef2025/task4/).
 
-![Competition Participation](img2_Participation.png)
+![Competition Participation](img/img2_Participation.png)
 
 ## Performance Results
 
@@ -17,9 +21,10 @@ The task is evaluated using Mean Reciprocal Rank (MRR@5) and is part of the [CLE
 | BM25 Baseline             | 0.5079   | 0.5511   | 0.5561   | -                    |
 | DocT5Query                | 0.5224   | 0.5629   | 0.5679   | +2.14%               |
 | ColBERT v2                | 0.5857   | 0.6354   | 0.6354   | +15.10%              |
+| ColBERT v2 (fine-tuned)   | 0.5878   | 0.6383   | 0.6383   | +15.82%              |
 | OpenAI Embedding          | 0.6136   | 0.6767   | 0.6767   | +22.84%              |
 
-OpenAI Embedding outperforms all other approaches, with a 22.84% improvement over the BM25 baseline on MRR@5.
+OpenAI Embedding outperforms all other approaches, with a 22.84% improvement over the BM25 baseline on MRR@5. Our fine-tuned ColBERT v2 model shows modest but promising improvements over the base version.
 
 ## Approaches Overview
 
@@ -47,11 +52,19 @@ This approach leverages OpenAI's pre-trained text embedding models to generate d
 - **Model**: OpenAI text-embedding-3-small
 - **Performance**: 22.84% improvement over BM25 baseline on MRR@5
 
+### 4. ColBERT v2 Fine-tuning (Domain Adaptation)
+
+This approach builds on the base ColBERT v2 model by implementing GPU acceleration and fine-tuning on domain-specific data to better align with scientific literature retrieval tasks.
+
+- **Advantages**: Domain adaptation, GPU acceleration, preserves ColBERT architecture advantages
+- **Model**: Fine-tuned colbert-ir/colbertv2.0 with custom triplets
+- **Performance**: 15.82% improvement over BM25 baseline on MRR@5 (+0.46% over base ColBERT)
+
 ## Information Retrieval Model Comparison
 
 The impressive performance of the OpenAI embedding approach can be understood in the context of the evolution of information retrieval models:
 
-![IR Models Comparison](img1_IR_models.png)
+![IR Models Comparison](img/img1_IR_models.png)
 *Image Source: [ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT](https://dl.acm.org/doi/pdf/10.1145/3397271.3401075)*
 
 OpenAI embeddings excel for several reasons:
@@ -64,10 +77,12 @@ OpenAI embeddings excel for several reasons:
 
 ```
 CheckThat-Task4B-ColBERT/
+├── README.md                       # Project overview and documentation
 ├── check_dataset.py                # Dataset inspection utilities
 ├── .gitignore                      # Git ignore file
-├── img1_IR_models.png              # Information retrieval models comparison
-├── img2_Participation.png          # Competition participation screenshot
+├── img/                            # Image directory for documentation
+│   ├── img1_IR_models.png          # Information retrieval models comparison
+│   └── img2_Participation.png      # Competition participation screenshot
 ├── m1_doct5query/                  # DocT5Query approach
 │   ├── doc_t5_query.md             # Implementation details and results
 │   ├── doc_t5_query.py             # Implementation code
@@ -75,7 +90,6 @@ CheckThat-Task4B-ColBERT/
 │   ├── requirements.txt            # Python dependencies
 │   └── subtask4b_query_tweets.tsv  # Query dataset
 ├── m2_colbertv2/                   # ColBERT v2 approach
-│   ├── CheckThat-Task4B-ColBERT-Summary.md # Project summary
 │   ├── colbert_predictions.tsv     # ColBERT predictions
 │   ├── colbert_retriever_optimized.py # Optimized implementation
 │   ├── colbert_technical_report.md # Technical details and results
@@ -89,8 +103,14 @@ CheckThat-Task4B-ColBERT/
 │   ├── openai_embedding_method.md  # Implementation details and results
 │   ├── predictions.tsv             # Prediction results
 │   ├── requirements.txt            # Python dependencies
-│   └── subtask4b_collection_data.pkl # Collection dataset
-├── README.md                       # This file
+│   └── README.md                   # Approach documentation
+├── m4_colbertv2_finetuning/        # ColBERT v2 fine-tuning approach
+│   ├── colbert_retriever_optimized.py # GPU-accelerated implementation
+│   ├── finetune_colbert_ragatouille.py # Fine-tuning implementation
+│   ├── generate_finetune_data.py   # Training data generation script
+│   ├── ragatouille_training_data.json # Generated training triplets
+│   ├── requirements.txt            # Python dependencies
+│   └── README.md                   # Approach documentation
 └── subtask_4b/                     # Task dataset directory
     ├── getting_started_subtask4b.ipynb # Notebook with starter code
     ├── README.md                   # Dataset description
@@ -104,6 +124,7 @@ CheckThat-Task4B-ColBERT/
 - Python 3.9+
 - For ColBERT: Windows Subsystem for Linux (WSL2) with Ubuntu 22.04
 - For OpenAI: OpenAI API key
+- For ColBERT Fine-tuning: NVIDIA GPU with CUDA support
 
 ### Setup for each approach
 
@@ -129,6 +150,21 @@ pip install -r requirements.txt
 # Set your OpenAI API key
 export OPENAI_API_KEY="your-api-key-here"
 python openai_embedding.py
+```
+
+4. **ColBERT v2 Fine-tuning** (requires NVIDIA GPU):
+```bash
+cd m4_colbertv2_finetuning
+pip install -r requirements.txt
+
+# Generate fine-tuning triplets (if needed)
+python generate_finetune_data.py --num_samples 100
+
+# Fine-tune the model
+python finetune_colbert_ragatouille.py
+
+# Run retrieval with fine-tuned model
+python colbert_retriever_optimized.py --use_finetuned_model
 ```
 
 ## Project Tracking
