@@ -118,7 +118,7 @@ def generate_triplets(queries_df, collection_df, output_file, num_samples=None):
         triplets.append(triplet)
         
         # Sleep to avoid rate limiting
-        time.sleep(0.2)
+        time.sleep(0.5)
     
     # Save the triplets to a file
     with open(output_file, 'w') as f:
