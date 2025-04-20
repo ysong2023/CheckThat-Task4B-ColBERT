@@ -1,0 +1,29 @@
+# Core dependencies for GPU-accelerated ColBERT fine-tuning
+torch==1.13.1+cu116
+torchvision==0.14.1+cu116
+torchaudio==0.13.1+cu116
+faiss-gpu==1.7.1.post3
+RAGatouille==0.0.9
+transformers==4.22.0
+sentence-transformers==2.2.2
+
+# Data processing
+numpy==1.26.4
+pandas==2.2.3
+tqdm==4.67.1
+scikit-learn==1.6.1
+
+# API integration
+openai==1.75.0
+python-dotenv==1.1.0
+
+# Utilities
+nltk==3.9.1
+regex==2024.11.6
+psutil==7.0.0
+
+# For CPU baseline comparison
+rank-bm25
+
+# Optional but recommended
+tensorboard  # For tracking fine-tuning progress 
